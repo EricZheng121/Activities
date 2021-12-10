@@ -1,0 +1,37 @@
+from geopy.geocoders import Nominatim
+from geopy import distance
+import pandas as pd
+import numpy as np
+import io
+pd.options.mode.chained_assignment = None  # default='warn'
+url = 'https://raw.githubusercontent.com/EricZheng121/datasci/main/THEATEROUT.csv'
+df = pd.read_csv(url,index_col=False)
+
+print("Enter address without commas")
+x = input()
+####################################### 695 Park Ave New York NY 10065      hunter college example
+loc = Nominatim(user_agent="GetLoc")
+getLoc = loc.geocode(x)
+print("Input Address :", getLoc.address)
+
+
+current_loc = getLoc.longitude
+current_lat = getLoc.latitude
+
+num_list = [] 
+num_list.append(current_loc)
+num_list.append(current_lat)
+df['distance'] = '1'
+
+
+for i in range(len(df)):
+  test1 = df['the_geom'][i]
+  df['distance'][i] = distance.distance(num_list, test1).miles
+  df['distance'][i] = "{:.3f}".format(df['distance'][i])
+df = df.sort_values(by=['distance'])
+df=df.reset_index()
+df['distance'] =df['distance'].astype(str)+" miles"
+
+
+
+print(df[['NAME', 'ADDRESS1', 'distance']].head(3))
